@@ -239,44 +239,15 @@ class RiotApiClient {
 
   // Get player ranked info
   async getPlayerRankedInfo(riotId, region) {
-    try {
-      const { gameName, tagLine } = PlayerUtils.parseRiotId(riotId);
-      
-      // Step 1: Get account info
-      const accountData = await this.getAccountByRiotId(gameName, tagLine);
-      
-      // Step 2: Get summoner info
-      const summonerData = await this.getSummonerByPuuid(accountData.puuid, region);
-      
-      // Step 3: Get league entries
-      const leagueEntries = await this.getLeagueEntriesBySummonerId(summonerData.id, region);
-      
-      // Find solo queue entry
-      const soloQueue = leagueEntries.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
-      
-      if (!soloQueue) {
-        throw new Error('No ranked solo queue data found');
-      }
-      
-      return {
-        summonerId: summonerData.id,
-        summonerName: summonerData.name,
-        summonerLevel: summonerData.summonerLevel,
-        tier: soloQueue.tier,
-        rank: soloQueue.rank,
-        leaguePoints: soloQueue.leaguePoints,
-        wins: soloQueue.wins,
-        losses: soloQueue.losses,
-        veteran: soloQueue.veteran,
-        inactive: soloQueue.inactive,
-        freshBlood: soloQueue.freshBlood,
-        hotStreak: soloQueue.hotStreak,
-        lastUpdated: new Date().toISOString()
-      };
-    } catch (error) {
-      console.error('Error fetching player ranked info:', error);
-      throw error;
+    const baseUrl = window.location.origin;
+    const response = await fetch(`${baseUrl}/api/player?riotId=${encodeURIComponent(riotId)}&region=${region}`);
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'API request failed');
     }
+    
+    return await response.json();
   }
 
   // Update player with API data
