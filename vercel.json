@@ -1,7 +1,5 @@
 {
-  "functions": {
-    "api/player.js": {
-      "runtime": "@vercel/node"
-    }
+  "api": {
+    "runtime": "@vercel/node@18.x"
   }
 }
