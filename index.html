@@ -94,10 +94,16 @@
             <div id="players-tab" class="tab-content">
                 <div class="section-header">
                     <h2>Manage Players</h2>
-                    <button class="btn btn-primary" onclick="showAddPlayerModal()">
-                        <span class="btn-icon">➕</span>
-                        Add Player
-                    </button>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="showBulkImportModal()">
+                            <span class="btn-icon">📥</span>
+                            Import from OP.GG
+                        </button>
+                        <button class="btn btn-primary" onclick="showAddPlayerModal()">
+                            <span class="btn-icon">➕</span>
+                            Add Player
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="players-grid" id="players-grid">
