@@ -679,6 +679,143 @@ function hideLoadingOverlay() {
   }
 }
 
+
+/**
+ * Show bulk import modal
+ */
+function showBulkImportModal() {
+  const modal = document.createElement('div');
+  modal.className = 'modal active';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Import from OP.GG</h3>
+        <button class="modal-close" onclick="closeBulkImportModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>OP.GG Multi-search URL:</label>
+          <input type="url" id="opggUrl" placeholder="Paste your op.gg multi-search URL">
+        </div>
+        <p class="text-muted">
+          Go to op.gg, search multiple summoners, copy the URL and paste it here.
+          We'll extract the player data automatically.
+        </p>
+        <div class="form-group">
+          <label>Default Rank for imported players:</label>
+          <select id="defaultTier">
+            <option value="IRON">Iron</option>
+            <option value="BRONZE">Bronze</option>
+            <option value="SILVER" selected>Silver</option>
+            <option value="GOLD">Gold</option>
+            <option value="PLATINUM">Platinum</option>
+            <option value="DIAMOND">Diamond</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeBulkImportModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="importFromOpgg()">Import Players</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  document.getElementById('opggUrl').focus();
+}
+
+/**
+ * Close bulk import modal
+ */
+function closeBulkImportModal() {
+  const modal = document.querySelector('.modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+/**
+ * Import players from OP.GG URL
+ */
+async function importFromOpgg() {
+  const url = document.getElementById('opggUrl').value.trim();
+  const defaultTier = document.getElementById('defaultTier').value;
+  
+  if (!url || !url.includes('op.gg')) {
+    NotificationUtils.showError('Please enter a valid op.gg URL');
+    return;
+  }
+  
+  try {
+    // Extract summoner names from URL
+    const urlObj = new URL(url);
+    const summoners = urlObj.searchParams.get('summoners');
+    
+    if (!summoners) {
+      NotificationUtils.showError('No summoners found in URL');
+      return;
+    }
+    
+    // Parse summoner names
+    const summonerList = summoners.split(',').map(s => decodeURIComponent(s.trim()));
+    let importedCount = 0;
+    let skippedCount = 0;
+    
+    // Add players to app
+    summonerList.forEach(summoner => {
+      if (!summoner.includes('#')) {
+        skippedCount++;
+        return;
+      }
+      
+      // Check if player already exists
+      const existingPlayer = appState.players.find(p => 
+        p.riotId.toLowerCase() === summoner.toLowerCase()
+      );
+      
+      if (existingPlayer) {
+        skippedCount++;
+        return;
+      }
+      
+      const [gameName, tagLine] = summoner.split('#');
+      
+      const newPlayer = {
+        id: RandomUtils.generateUUID(),
+        name: gameName,
+        riotId: summoner,
+        region: 'euw1', // Default to EUW since your op.gg link shows EUW
+        tier: defaultTier,
+        division: 'IV',
+        lp: RandomUtils.randomInt(0, 50), // Random starting LP
+        wins: RandomUtils.randomInt(10, 30),
+        losses: RandomUtils.randomInt(8, 25),
+        dateAdded: new Date().toISOString(),
+        lastUpdated: new Date().toISOString()
+      };
+      
+      appState.players.push(newPlayer);
+      importedCount++;
+    });
+    
+    saveAppState();
+    renderCurrentTab();
+    updateHeaderStats();
+    
+    closeBulkImportModal();
+    
+    if (importedCount > 0) {
+      NotificationUtils.showSuccess(`Imported ${importedCount} players! ${skippedCount > 0 ? `(${skippedCount} skipped - already exist or invalid format)` : ''}`);
+    } else {
+      NotificationUtils.showWarning('No new players imported. All players may already exist.');
+    }
+    
+  } catch (error) {
+    console.error('Import error:', error);
+    NotificationUtils.showError(`Failed to import: ${error.message}`);
+  }
+}
+
 // Global functions for onclick handlers
 window.showTab = showTab;
 window.showAddPlayerModal = showAddPlayerModal;
@@ -693,3 +830,7 @@ window.saveSettings = saveSettings;
 window.exportData = exportData;
 window.importData = importData;
 window.clearAllData = clearAllData;
+window.showBulkImportModal = showBulkImportModal;
+window.closeBulkImportModal = closeBulkImportModal;
+window.importFromOpgg = importFromOpgg;
+
