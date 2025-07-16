@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoL Competition Tracker</title>
+    <link rel="stylesheet" href="css/lol_mjnon_css_style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>LoL Competition Tracker</h1>
+                    <span class="subtitle">Track your friends' ranked progress</span>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Players</span>
+                        <span class="stat-value" id="totalPlayers">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Last Updated</span>
+                        <span class="stat-value" id="lastUpdated">Never</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('leaderboard')">
+                <span class="nav-icon">🏆</span>
+                Leaderboard
+            </button>
+            <button class="nav-tab" onclick="showTab('players')">
+                <span class="nav-icon">👥</span>
+                Players
+            </button>
+            <button class="nav-tab" onclick="showTab('achievements')">
+                <span class="nav-icon">🎖️</span>
+                Achievements
+            </button>
+            <button class="nav-tab" onclick="showTab('settings')">
+                <span class="nav-icon">⚙️</span>
+                Settings
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Leaderboard Tab -->
+            <div id="leaderboard-tab" class="tab-content active">
+                <div class="section-header">
+                    <h2>Current Leaderboard</h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="autoUpdateAll()">
+                            <span class="btn-icon">🔄</span>
+                            Auto Update All
+                        </button>
+                        <button class="btn btn-secondary" onclick="refreshLeaderboard()">
+                            <span class="btn-icon">⚡</span>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="leaderboard-container">
+                    <div class="leaderboard-header">
+                        <div class="rank-col">Rank</div>
+                        <div class="player-col">Player</div>
+                        <div class="tier-col">Tier</div>
+                        <div class="lp-col">LP</div>
+                        <div class="winrate-col">Win Rate</div>
+                        <div class="games-col">Games</div>
+                        <div class="score-col">Score</div>
+                    </div>
+                    <div id="leaderboard-list" class="leaderboard-list">
+                        <div class="empty-state">
+                            <div class="empty-icon">👥</div>
+                            <h3>No players yet</h3>
+                            <p>Add your first player to get started!</p>
+                            <button class="btn btn-primary" onclick="showTab('players')">Add Player</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Players Tab -->
+            <div id="players-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>Manage Players</h2>
+                    <button class="btn btn-primary" onclick="showAddPlayerModal()">
+                        <span class="btn-icon">➕</span>
+                        Add Player
+                    </button>
+                </div>
+                
+                <div class="players-grid" id="players-grid">
+                    <!-- Players will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Achievements Tab -->
+            <div id="achievements-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>Achievements</h2>
+                    <p class="section-description">Track milestone achievements and bragging rights</p>
+                </div>
+                
+                <div class="achievements-grid" id="achievements-grid">
+                    <!-- Achievements will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>Settings</h2>
+                    <p class="section-description">Configure your competition tracker</p>
+                </div>
+                
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>Data Management</h3>
+                        <div class="settings-actions">
+                            <button class="btn btn-secondary" onclick="exportData()">
+                                <span class="btn-icon">📤</span>
+                                Export Data
+                            </button>
+                            <button class="btn btn-secondary" onclick="importData()">
+                                <span class="btn-icon">📥</span>
+                                Import Data
+                            </button>
+                            <button class="btn btn-danger" onclick="clearAllData()">
+                                <span class="btn-icon">🗑️</span>
+                                Clear All Data
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <h3>API Configuration</h3>
+                        <div class="form-group">
+                            <label for="apiKey">Riot API Key (Optional)</label>
+                            <input type="password" id="apiKey" placeholder="Enter your API key for auto-updates">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveApiKey()">Save API Key</button>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <h3>Competition Settings</h3>
+                        <div class="form-group">
+                            <label for="competitionName">Competition Name</label>
+                            <input type="text" id="competitionName" placeholder="My Friends League">
+                        </div>
+                        <div class="form-group">
+                            <label for="season">Season</label>
+                            <input type="text" id="season" placeholder="Season 2025">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Player Modal -->
+    <div id="add-player-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Player</h3>
+                <button class="modal-close" onclick="closeAddPlayerModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-player-form">
+                    <div class="form-group">
+                        <label for="displayName">Display Name</label>
+                        <input type="text" id="displayName" required placeholder="Enter display name">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="riotId">Riot ID</label>
+                            <input type="text" id="riotId" required placeholder="PlayerName#1234">
+                        </div>
+                        <div class="form-group">
+                            <label for="region">Region</label>
+                            <select id="region" required>
+                                <option value="na1">North America</option>
+                                <option value="euw1">Europe West</option>
+                                <option value="eun1">Europe Nordic & East</option>
+                                <option value="kr">Korea</option>
+                                <option value="br1">Brazil</option>
+                                <option value="la1">Latin America North</option>
+                                <option value="la2">Latin America South</option>
+                                <option value="oc1">Oceania</option>
+                                <option value="tr1">Turkey</option>
+                                <option value="ru">Russia</option>
+                                <option value="jp1">Japan</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentTier">Current Tier</label>
+                            <select id="currentTier">
+                                <option value="IRON">Iron</option>
+                                <option value="BRONZE">Bronze</option>
+                                <option value="SILVER">Silver</option>
+                                <option value="GOLD">Gold</option>
+                                <option value="PLATINUM">Platinum</option>
+                                <option value="DIAMOND">Diamond</option>
+                                <option value="MASTER">Master</option>
+                                <option value="GRANDMASTER">Grandmaster</option>
+                                <option value="CHALLENGER">Challenger</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="currentRank">Current Rank</label>
+                            <select id="currentRank">
+                                <option value="IV">IV</option>
+                                <option value="III">III</option>
+                                <option value="II">II</option>
+                                <option value="I">I</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="leaguePoints">League Points</label>
+                            <input type="number" id="leaguePoints" min="0" max="100" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="wins">Wins</label>
+                            <input type="number" id="wins" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="losses">Losses</label>
+                            <input type="number" id="losses" min="0" value="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddPlayerModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="addPlayer()">Add Player</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Updating player data...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/lol_mjnon_utils.js"></script>
+    <script src="js/lol_mjnon_api.js"></script>
+    <script src="js/lol_mjnon_app.js"></script>
+</body>
+</html>
